@@ -1,44 +1,57 @@
+
 #include <esp_now.h>
 #include <WiFi.h>
+//========================================================================================================
+// This Code must match the receiver's PairCode
+char PAIRCODE[] = "DragonControlSystem";
+//========================================================================================================
+// SET PINS
+//
+// PIN ARRAY setup = { TRAIN-1, TRAIN-2, TRAIN-3, TRAIN-4 }
 
-typedef struct rc_struct {
-  short loco_number;
-  short ch1;
-  short ch2;
-  short ch3;
-  short ch4;
-  short ch5;
-  short ch6;
-} rc_struct;
+const byte POT[] = { 12, 14, 27, 13 };  // Potentiometer for Speed/Throttle
 
-esp_now_peer_info_t devices[LOCONUMBER] = {};
+const byte DIR[] = { 12, 14, 27, 13 };  // Toggle switch for Direction
+
+const byte LIGHT[] = { 12, 14, 27, 13 };  // Toggle switch for Headlight
+
+const byte MOMENTARY[] = { 12, 14, 27, 13 };  // Momentary swtich
+
+#define pairPIN 22   // Connected to a Momentary switch for pairing Locomotives during operation
+#define statusLED 5  // Led to indicate when atleast one Locomotive is connected
+
+//========================================================================================================
+// Debug options can be commented out if not required
+#define ESPNOW_DEBUG
+//========================================================================================================
+
 int LocoCount = 0;
-
-#define LOCONUMBER 8
-#define CHANNEL 8
-#define PRINTSCANRESULTS 0
-
-uint8_t *peer_addr;
 
 void InitESPNow();
 void FindNearbyLocos();
 void manageLocos();
 
 void setup() {
-  Serial.begin(115200);
   WiFi.mode(WIFI_STA);
+  InitESPNow();
+  esp_now_register_send_cb(OnDataSent);
+  FindNearbyLocos();
+#ifdef ESPNOW_DEBUG  
+  Serial.begin(115200);
   Serial.println("Dragon_Locomotive_Contoller");
   Serial.print("STA MAC: ");
   Serial.println(WiFi.macAddress());
-  InitESPNow();
-  esp_now_register_send_cb(OnDataSent);
+#endif
 }
 
 void loop() {
-  FindNearbyLocos();
   if (LocoCount > 0) {
-    manageLocos();
-    transmitData();
+    for (int i = 0; i <= 3; i++) {  // Loop repeats 4 times for 4 Locomotives
+      processinputs();
+      manageLocos();
+      transmitData();
+    }
   } else {
+    FindNearbyLocos();
   }
 }

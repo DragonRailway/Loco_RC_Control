@@ -1,3 +1,10 @@
+
+#define CHANNEL 8
+esp_now_peer_info_t devices[CHANNEL] = {};
+
+#define CHANNEL 8
+#define PRINTSCANRESULTS 0
+
 void InitESPNow() {
   WiFi.disconnect();
   if (esp_now_init() == ESP_OK) { Serial.println("ESPNow Init Success");  }
@@ -57,7 +64,7 @@ void FindNearbyLocos() {
       if (PRINTSCANRESULTS) { // Show SSID and RSSI for devices found
         Serial.print(i + 1); Serial.print(": "); Serial.print(SSID); Serial.print(" ["); Serial.print(BSSIDstr); Serial.print("]"); Serial.print(" ("); Serial.print(RSSI); Serial.print(")"); Serial.println("");
       }      
-      if (SSID.indexOf("DragonControlSystem") == 0) { // Find devices starting with "DragonControlSystem"
+      if (SSID.indexOf(PAIRCODE) == 0) { // Find devices starting with the same Paircode
         Serial.print(i + 1); Serial.print(": "); Serial.print(SSID); Serial.print(" ["); Serial.print(BSSIDstr); Serial.print("]"); Serial.print(" ("); Serial.print(RSSI); Serial.print(")"); Serial.println("");
         int mac[6]; // Get Mac Address of the Device
 

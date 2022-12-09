@@ -1,19 +1,33 @@
+
+typedef struct rc_struct {
+  short loconumber;
+  short ch1;
+  short ch2;
+  short ch3;
+  short ch4;
+  short ch5;
+  short ch6;
+} rc_struct;
+
+
+uint8_t *peer_addr;
+
 void transmitData() {
   for (int i = 0; i < LocoCount; i++) {
     const uint8_t *peer_addr = devices[i].peer_addr;
   }
 
   rc_struct transmitdata;
-  transmitdata.loco_number = 0;
+  transmitdata.loconumber = 0;
   transmitdata.ch1 = 0;
   transmitdata.ch2 = 0;
   transmitdata.ch3 = 0;
   transmitdata.ch4 = 0;
   transmitdata.ch5 = 0;
   transmitdata.ch6 = 0;
-  
-  esp_err_t result = esp_now_send(peer_addr, (uint8_t *)&transmitdata, sizeof(rc_struct));
 
+  esp_err_t result = esp_now_send(peer_addr, (uint8_t *)&transmitdata, sizeof(rc_struct));
+#ifdef ESPNOW_DEBUG
   Serial.print("Send Status: ");
   if (result == ESP_OK) {
     Serial.println("Success");
@@ -31,9 +45,12 @@ void transmitData() {
   } else {
     Serial.println("Not sure what happened");
   }
+#endif
 }
 
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
+
+#ifdef ESPNOW_DEBUG
   char macStr[18];
   snprintf(macStr, sizeof(macStr), "%02x:%02x:%02x:%02x:%02x:%02x",
            mac_addr[0], mac_addr[1], mac_addr[2], mac_addr[3], mac_addr[4], mac_addr[5]);
@@ -41,4 +58,5 @@ void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
   Serial.println(macStr);
   Serial.print("Last Packet Send Status: ");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Delivery Success" : "Delivery Fail");
+#endif
 }
