@@ -1,6 +1,6 @@
 
 typedef struct rc_struct {
-  short loco_number;
+  short loconumber;
   short ch1;
   short ch2;
   short ch3;
@@ -8,28 +8,39 @@ typedef struct rc_struct {
   short ch5;
   short ch6;
 } rc_struct;
+rc_struct rcData;
 
-int channel[6];
+short channel_1 = ppmMid;  // Throttle
+short channel_2 = ppmMid;  // Direction
+short channel_3 = ppmMid;  // Light
+short channel_4 = ppmMid;  // Coupler
+short channel_5 = ppmMid;  // extra 1
+short channel_6 = ppmMid;  // extra 2
+
 #define WIFICHANNEL 1
 
-void OnDataRecv(const uint8_t * mac, const uint8_t *data, int len) {
-   
-  rc_struct* outputdata =(rc_struct*) data;
-  
-  Serial.println(outputdata->loco_number);
-  Serial.println(outputdata->ch1);
-  Serial.println(outputdata->ch2);
-  Serial.println(outputdata->ch3);
-  Serial.println(outputdata->ch4);
-  Serial.println(outputdata->ch5);
-  Serial.println(outputdata->ch6);
-Serial.println(rc_struct.loconumber);
+//==============================================================================================
+void OnDataRecv(const uint8_t *mac, const uint8_t *receivedData, int len) {
+  memcpy(&rcData, receivedData, sizeof(rcData));
+  // Channel values are assigned only for the assigned LocoNumber only
+  if (rcData.loconumber = LocoNumber) {
+    channel_1 = rcData.ch1;
+    channel_2 = rcData.ch2;
+    channel_3 = rcData.ch3;
+    channel_4 = rcData.ch4;
+    channel_5 = rcData.ch5;
+    channel_6 = rcData.ch6;
+  }
 }
 
 void InitESPNow() {
   WiFi.disconnect();
-  if (esp_now_init() == ESP_OK) { Serial.println("ESPNow Init Success");  }
-  else { Serial.println("ESPNow Init Failed"); ESP.restart();  }
+  if (esp_now_init() == ESP_OK) {
+    Serial.println("ESPNow Init Success");
+  } else {
+    Serial.println("ESPNow Init Failed");
+    ESP.restart();
+  }
 }
 
 void configDeviceAP() {
@@ -43,4 +54,3 @@ void configDeviceAP() {
     Serial.println("Loco Config Success. Broadcasting with AP: " + String(SSID));
   }
 }
-

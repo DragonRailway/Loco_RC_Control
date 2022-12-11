@@ -20,16 +20,6 @@ void InitESPNow() {
 
 void manageLocos() {
 
-  if (connectedLoco > 0) {
-    for (int i = 0; i < connectedLoco; i++) {
-      bool exists = esp_now_is_peer_exist(devices[i].peer_addr);  // check if the Loco exists
-      if (exists) {
-      } else {
-        esp_err_t addStatus = esp_now_add_peer(&devices[i]);
-      }
-    }
-  }
-
 #ifdef ESPNOW_DEBUG
   if (connectedLoco > 0) {
     for (int i = 0; i < connectedLoco; i++) {
@@ -44,7 +34,7 @@ void manageLocos() {
       if (exists) {
         Serial.println("Loco Already Paired");  // Device already paired.
       } else {
-        esp_err_t addStatus = esp_now_add_peer(&devices[i]);  // Device not paired, Pairing...
+        esp_err_t addStatus = esp_now_add_peer(&devices[i]);
         if (addStatus == ESP_OK) {
           Serial.println("Pair success");  // Pairing successful
         } else if (addStatus == ESP_ERR_ESPNOW_NOT_INIT) {
@@ -83,6 +73,7 @@ void FindNearbyLocos() {
       String SSID = WiFi.SSID(i);
       int32_t RSSI = WiFi.RSSI(i);
       String BSSIDstr = WiFi.BSSIDstr(i);
+      /*
       if (PRINTSCANRESULTS) {  // Show SSID and RSSI for devices found
         Serial.print(i + 1);
         Serial.print(": ");
@@ -94,7 +85,7 @@ void FindNearbyLocos() {
         Serial.print(RSSI);
         Serial.print(")");
         Serial.println("");
-      }
+      } */
       if (SSID.indexOf(PAIRCODE) == 0) {  // Find devices starting with the same Paircode
         Serial.print(i + 1);
         Serial.print(": ");
@@ -119,11 +110,13 @@ void FindNearbyLocos() {
       }
     }
   }
+#ifdef ESPNOW_DEBUG
   if (connectedLoco > 0) {
     Serial.print(connectedLoco);
     Serial.println(" Loco found");
   } else {
     Serial.println("No Locos Found, checking again.");
   }
+#endif
   WiFi.scanDelete();
 }
