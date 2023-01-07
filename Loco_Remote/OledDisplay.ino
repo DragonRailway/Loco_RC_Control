@@ -11,7 +11,7 @@ void OledSetup() {
   u8g2.clearBuffer();
 
 #ifdef OLED_DEBUG
-  Serial.println("Scanning for OLED display");
+  Serial.println("\n Scanning for OLED display");
   byte error, address;
   int nDevices;
   nDevices = 0;
@@ -51,38 +51,32 @@ void OledSetup() {
 }
 
 
-COROUTINE(OledDash) {
-  COROUTINE_LOOP() {
-    char* ModelID = AuthName;
-    uint8_t OledSpeed = map(rcdata.THROTTLE, 0, 127, 0, 200);
-    OledSpeed = constrain(OledSpeed, 0, 200);
-    ps.clear();
-    ps.println(OledSpeed, 10);
-    char* SpeedBuffer = ps.getBuffer();
+void OledDash() {
+  char* ModelID = AuthName;
+  uint8_t OledSpeed = EncVal*5;
+  OledSpeed = constrain(OledSpeed, 0, 200);
+  ps.clear();
+  ps.println(OledSpeed, 10);
+  char* SpeedBuffer = ps.getBuffer();
 
-    u8g2.firstPage();
-    do {
-      //    Display a frame on the border - for debugging only
-      //u8g2.drawFrame(0, 0, 128, 64);
+  u8g2.firstPage();
+  do {
+    //    Display a frame on the border - for debugging only
+    //u8g2.drawFrame(0, 0, 128, 64);
 
-      //    Draw Speed down-left corner
-      u8g2.setFont(u8g2_font_logisoso42_tn);
-      uint8_t SpeedX = 128 - 24 - u8g2.getStrWidth(SpeedBuffer) / 2;
-      u8g2.setDrawColor(1);
-      u8g2.drawStr(SpeedX, 64, SpeedBuffer);
+    //    Draw Speed down-left corner
+    u8g2.setFont(u8g2_font_logisoso42_tn);
+    uint8_t SpeedX = 128 - 24 - u8g2.getStrWidth(SpeedBuffer) / 2;
+    u8g2.setDrawColor(1);
+    u8g2.drawStr(SpeedX, 62, SpeedBuffer);
 
-      //    Display Locomotive Model Number
-      u8g2.setFont(u8g2_font_helvB14_tf);
-      uint8_t ModelX = u8g2.getStrWidth(ModelID) + 4;
-      u8g2.setDrawColor(1);
-      u8g2.drawRBox(0, 0, ModelX, 18, 5);
-      u8g2.setDrawColor(0);
-      u8g2.drawStr(2, 16, ModelID);
+    //    Display Locomotive Model Number
+    u8g2.setFont(u8g2_font_helvB14_tf);
+    uint8_t ModelX = u8g2.getStrWidth(ModelID) + 4;
+    u8g2.setDrawColor(1);
+    u8g2.drawRBox(0, 0, ModelX, 18, 3);
+    u8g2.setDrawColor(0);
+    u8g2.drawStr(2, 16, ModelID);
 
-    } while (u8g2.nextPage());
-
-#ifdef OLED_DEBUG
-Serial.println(OledSpeed);
-#endif
-  }
+  } while (u8g2.nextPage());
 }

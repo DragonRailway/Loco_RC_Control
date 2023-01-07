@@ -4,9 +4,9 @@ void transmitData() {
   esp_err_t SendStatus = esp_now_send(broadcastAddress, (uint8_t *)&rcdata, sizeof(rcdata));
 #ifdef ESPNOW_DEBUG
   if (SendStatus == ESP_OK) {
-    Serial.println("Send success");
+    Serial.println("  Send success");
   } else {
-    Serial.println("Failed");
+    Serial.println("  Failed");
   }
 #endif
 }
@@ -20,9 +20,9 @@ void InitESPNow() {
   }
 #ifdef ESPNOW_DEBUG
   if (esp_now_init() == ESP_OK) {
-    Serial.println("ESPNow Init Success");
+    Serial.println("\n  ESPNow Init Success");
   } else {
-    Serial.println("ESPNow Init Failed");
+    Serial.println("\n  ESPNow Init Failed");
   }
 #endif
   // Register peer
@@ -44,7 +44,7 @@ void InitESPNow() {
 // Data send acknowledgement - not relevant for broadcast mode
 void OnDataSent(const uint8_t *mac_addr, esp_now_send_status_t status) {
 #ifdef ESPNOW_DEBUG2
-  Serial.print("\r\nLast Packet Send Status:\t");
+  Serial.print("\r\n  Last Packet Send Status:\t");
   Serial.println(status == ESP_NOW_SEND_SUCCESS ? "Success" : "Fail");
 #endif
 }

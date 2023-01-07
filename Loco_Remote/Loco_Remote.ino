@@ -3,11 +3,13 @@
 
 //==============================================================================================
 
-#include <esp_now.h>
 #include <WiFi.h>
 #include <Wire.h>  //  Wire.h for I2C OLED Display
+#include <esp_now.h>
+#include <Esp.h>  // for displaying memory information
 
-//    Install
+//    Install the following libraries (available through Arduino IDE
+
 #include <Toggle.h>          //https://github.com/Dlloydev/Toggle
 #include <U8g2lib.h>         //https:github.com/olikraus/u8g2
 #include <PrintCharArray.h>  //https://github.com/RobTillaart/PrintCharArray
@@ -32,9 +34,10 @@ U8G2_SSD1306_128X64_NONAME_1_HW_I2C u8g2(U8G2_R0, /* reset=*/U8X8_PIN_NONE);
 
 //==============================================================================================
 
-//#define ESPNOW_DEBUG
+#define ESPNOW_DEBUG
 #define INPUT_DEBUG
 #define OLED_DEBUG
+#define CORE_DEBUG
 //==============================================================================================
 uint8_t broadcastAddress[] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };  // Broadcast mode
 
@@ -57,24 +60,82 @@ struct DataPack {
 DataPack rcdata;
 //==============================================================================================
 
+int8_t State = 0;
+int8_t Throttle = 0;
+int8_t Direction = 0;
+int8_t Left = 0;
+int8_t Right = 0;
+int8_t Up = 0;
+int8_t Down = 0;
+int8_t Light = 0;
+int8_t Horn = 0;
+int8_t Coupler = 0;
+int8_t Extra = 0;
+
+int8_t EncVal=0;
+//==============================================================================================
+TaskHandle_t Task1;
+TaskHandle_t Task2;
+
 void setup() {
 
 #ifdef ESPNOW_DEBUG || INPUT_DEBUG || OLED_DEBUG
   Serial.begin(115200);
-  Serial.println("Dragon Loco Remote");
+  Serial.println("\n  Dragon Loco Remote");
 #endif
 
   WiFi.mode(WIFI_STA);
   InitESPNow();
   esp_now_register_send_cb(OnDataSent);
 
-  OledSetup();
   SetupButtons();
-  CoroutineScheduler::setup();
+
+  xTaskCreatePinnedToCore(
+    Task2code, /* Task function. */
+    "Task2",   /* name of task. */
+    10000,     /* Stack size of task */
+    NULL,      /* parameter of the task */
+    1,         /* priority of the task */
+    &Task2,    /* Task handle to keep track of created task */
+    1);        /* pin task to core 1 */
+  delay(10);
+  xTaskCreatePinnedToCore(
+    Task1code, /* Task function. */
+    "Task1",   /* name of task. */
+    10000,     /* Stack size of task */
+    NULL,      /* parameter of the task */
+    1,         /* priority of the task */
+    &Task1,    /* Task handle to keep track of created task */
+    0);        /* pin task to core 0 */
+  delay(10);
 }
 //==============================================================================================
+//    Remote Functions are running on Core 1
 
-void loop() {
+void Task2code(void* pvParameters) {
+#if defined CORE_DEBUG
+  Serial.print("OLED running on core ");
+  Serial.println(xPortGetCoreID());
+#endif
 
-  CoroutineScheduler::loop();
+  for (;;) {
+    CheckInputs();
+    ReadEncoder();
+  }
 }
+//==============================================================================================
+//    OLED Display is running on Core 0
+
+void Task1code(void* pvParameters) {
+  Serial.print("Task1 running on core ");
+  Serial.println(xPortGetCoreID());
+
+  OledSetup();
+
+  for (;;) {
+    OledDash();
+  }
+}
+
+//==============================================================================================
+void loop() {}

@@ -1,16 +1,4 @@
-//==============================================================================================
 
-int8_t State = 0;
-int8_t Throttle = 0;
-int8_t Direction = 0;
-int8_t Left = 0;
-int8_t Right = 0;
-int8_t Up = 0;
-int8_t Down = 0;
-int8_t Light = 0;
-int8_t Horn = 0;
-int8_t Coupler = 0;
-int8_t Extra = 0;
 //==============================================================================================
 
 Toggle EncButton(EncSW);
@@ -52,44 +40,47 @@ void SetupButtons() {
 }
 //==============================================================================================
 
-COROUTINE(CheckInputs) {
-  COROUTINE_LOOP() {
+void CheckInputs() {  
 
-    enc.tick();  // update encoder -> call tick() as often as possible
+  EncButton.poll();
+  LeftButton.poll();
+  RightButton.poll();
+  UpButton.poll();
+  DownButton.poll();
+  LightButton.poll();
+  HornButton.poll();
+  CouplerButton.poll();
+  ExtraButton.poll();
 
-    EncButton.poll();
-    LeftButton.poll();
-    RightButton.poll();
-    UpButton.poll();
-    DownButton.poll();
-    LightButton.poll();
-    HornButton.poll();
-    CouplerButton.poll();
-    ExtraButton.poll();
+  bool buttonState = EncButton.onRelease() + LeftButton.onRelease() + UpButton.onRelease() + RightButton.onRelease()
+                     + DownButton.onRelease() + LightButton.onRelease() + HornButton.onRelease() + CouplerButton.onRelease()
+                     + ExtraButton.onRelease() + EncButton.onPress() + LeftButton.onPress() + UpButton.onPress()
+                     + RightButton.onPress() + DownButton.onPress() + LightButton.onPress()
+                     + HornButton.onPress() + CouplerButton.onPress() + ExtraButton.onPress();
 
-    bool buttonState = EncButton.onRelease() + LeftButton.onRelease() + UpButton.onRelease() + RightButton.onRelease()
-                       + DownButton.onRelease() + LightButton.onRelease() + HornButton.onRelease() + CouplerButton.onRelease()
-                       + ExtraButton.onRelease() + EncButton.onPress() + LeftButton.onPress() + UpButton.onPress()
-                       + RightButton.onPress() + DownButton.onPress() + LightButton.onPress()
-                       + HornButton.onPress() + CouplerButton.onPress() + ExtraButton.onPress();
-
-    if (buttonState) {
-      ReadButtons();
-      PackData();
-    }
-    COROUTINE_DELAY(1);
+  if (buttonState) {
+    ReadButtons();
+    PackData();
+    InputDebug();
   }
 }
 
-COROUTINE(ReadEncoder) {
-  COROUTINE_LOOP() {
-    if (enc.valueChanged()) {
-      Throttle = enc.getValue();
-      Throttle = map(Throttle, 0, 40, 0, 127);
-      Serial.println(enc.getValue());
-      PackData();
-    }
+void ReadEncoder() {
+  enc.tick(); // update encoder
+  if (enc.valueChanged()) {
+    Throttle = enc.getValue();
+    Throttle = map(Throttle, 0, 40, 0, 127);
+    Serial.println(enc.getValue());
+    PackData();
+    InputDebug();
   }
+}
+
+void InputDebug() {
+#ifdef INPUT_DEBUG
+  EncVal = enc.getValue();
+  Serial.println(EncVal);
+#endif
 }
 //==============================================================================================
 void ReadButtons() {
