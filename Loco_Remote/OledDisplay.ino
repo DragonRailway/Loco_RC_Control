@@ -1,3 +1,4 @@
+//==============================================================================================
 //#define OLED_DEBUG
 
 byte OledAddress = 0x3C;  //  SD1306 display address is 0x3C or 0x3D
@@ -50,10 +51,11 @@ void OledSetup() {
   //----------------------------------------------------
 }
 
+//==============================================================================================
 
 void OledDash() {
   char* ModelID = AuthName;
-  uint8_t OledSpeed = EncVal*5;
+  uint8_t OledSpeed = EncVal * 2;
   OledSpeed = constrain(OledSpeed, 0, 200);
   ps.clear();
   ps.println(OledSpeed, 10);
@@ -80,3 +82,5 @@ void OledDash() {
 
   } while (u8g2.nextPage());
 }
+
+//==============================================================================================

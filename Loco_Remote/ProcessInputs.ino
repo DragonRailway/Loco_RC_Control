@@ -36,11 +36,11 @@ void SetupButtons() {
   LightButton.setToggleTrigger(0);  // set trigger onPress: 0, or onRelease: 1
 
   enc.begin(EncA, EncB);
-  enc.setLimits(0, 40);
+  enc.setLimits(0, 50);
 }
 //==============================================================================================
 
-void CheckInputs() {  
+void CheckInputs() {
 
   EncButton.poll();
   LeftButton.poll();
@@ -52,11 +52,9 @@ void CheckInputs() {
   CouplerButton.poll();
   ExtraButton.poll();
 
-  bool buttonState = EncButton.onRelease() + LeftButton.onRelease() + UpButton.onRelease() + RightButton.onRelease()
-                     + DownButton.onRelease() + LightButton.onRelease() + HornButton.onRelease() + CouplerButton.onRelease()
-                     + ExtraButton.onRelease() + EncButton.onPress() + LeftButton.onPress() + UpButton.onPress()
-                     + RightButton.onPress() + DownButton.onPress() + LightButton.onPress()
-                     + HornButton.onPress() + CouplerButton.onPress() + ExtraButton.onPress();
+  bool buttonState = UpButton.onRelease() + UpButton.onPress() + DownButton.onRelease() + DownButton.onPress()
+                     + LightButton.onRelease() + LightButton.onPress() + HornButton.onRelease() + HornButton.onPress()
+                     + CouplerButton.onRelease() + CouplerButton.onPress() + ExtraButton.onRelease() + ExtraButton.onPress();
 
   if (buttonState) {
     ReadButtons();
@@ -66,10 +64,10 @@ void CheckInputs() {
 }
 
 void ReadEncoder() {
-  enc.tick(); // update encoder
+  enc.tick();  // update encoder
   if (enc.valueChanged()) {
     Throttle = enc.getValue();
-    Throttle = map(Throttle, 0, 40, 0, 127);
+    Throttle = map(Throttle, 0, 50, 0, 127);
     Serial.println(enc.getValue());
     PackData();
     InputDebug();
